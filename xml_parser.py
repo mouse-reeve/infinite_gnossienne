@@ -8,8 +8,10 @@ class NotationDistribution(object):
     musicXML -> musicXML '''
 
     def __init__(self, filename):
-        self.bass_distribution = defaultdict(list)
-        self.treble_distribution = defaultdict(list)
+        self.tokens = defaultdict(list)
+        self.bass_dist = None
+        self.treble_dist = None
+        self.identifiers = defaultdict(set)
         self.parse_mxl(filename)
 
     def parse_mxl(self, filename):
@@ -22,14 +24,28 @@ class NotationDistribution(object):
         # TODO: assumes only one part
         measures = parts[0].findall('measure')
 
+        # ---- STEP 1: tokenize
+        # identifiers and tokens will be set when this finishes
         for measure in measures:
-            self.parse_measure(measure)
-            break
+            self.tokenize_measure(measure)
 
-    def parse_measure(self, measure):
+        # ----- STEP 2: create the bass/melody distribution
+        # the bass staff is "2" -- this is brittle
+        staff = '2'
+        self.bass_dist = {d: defaultdict(lambda: 0) \
+                for d in self.identifiers[staff]}
+        bass = self.tokens[staff]
+        for (idx, note) in enumerate(bass):
+            try:
+                next_note = bass[idx + 1]
+                self.bass_dist[note.identifier][next_note.identifier] += 1
+            except IndexError:
+                break
+
+    def tokenize_measure(self, measure):
+        ''' identify and create atomic note group tokens '''
         notes = measure.findall('note')
 
-        tokens = []
         while len(notes):
             # remove the first note from the list
             note = notes[0]
@@ -39,7 +55,7 @@ class NotationDistribution(object):
 
             rest = note.find('rest')
             if len(notes) and rest is None:
-                # group gracenotes
+                # gracenotes
                 if note.find('grace') is not None:
                     note = notes[0]
                     notes = notes[1:]
@@ -66,10 +82,13 @@ class NotationDistribution(object):
                     except IndexError:
                         break
 
-            tokens.append(NoteToken(group))
-        return tokens
+            staff = note.find('staff').text
+            token = NoteToken(group)
+            self.identifiers[staff].add(token.identifier)
+            self.tokens[staff].append(NoteToken(group))
 
 
+    # ------- let's get generative, friends --------------#
     def generate_measure(self):
         ''' follow the markov probability distribution,
         creating the melody and then the accompanyment
@@ -85,7 +104,12 @@ class NoteToken(object):
     def __init__(self, notes):
         self.notes = notes
         self.identifier = get_identifier(notes)
-        print(self.identifier)
+        self.x_pos = None
+        for note in notes:
+            # the x position should ignore grace notes
+            if note.find('grace') is None:
+                self.x_pos = note.get('default-x')
+                break
 
 
 def get_identifier(notes):
