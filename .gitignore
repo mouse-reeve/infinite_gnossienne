@@ -1,0 +1,5 @@
+*.pyc
+*.swp
+venv/
+app/settings.py
+__pycache__/
