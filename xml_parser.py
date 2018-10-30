@@ -1,5 +1,6 @@
 ''' ingest and tokensize notes from musicXML '''
 from collections import defaultdict
+import random
 import sys
 from xml.etree import ElementTree
 
@@ -123,12 +124,11 @@ class NotationDistribution(object):
 
         notes = []
         start = self.tokens['2'][0].identifier
-        for _ in range(10):
+        for _ in range(20):
             notes.append(start)
             options = dist[start]
-            # TODO: weighted random choice
             try:
-                start = options.keys()[0]
+                start = weighted_choice(options)
             except IndexError:
                 # TODO: remove terminal notes
                 print('CRAP!')
@@ -179,6 +179,16 @@ def get_identifier(notes):
         group_id.append(''.join(identifier))
 
     return '|'.join(group_id)
+
+def weighted_choice(options):
+    ''' prefer likelier followups '''
+    if len(options) == 1:
+        return options.keys()[0]
+
+    weighted = []
+    for (option, weight) in options.items():
+        weighted += [option] * weight
+    return random.choice(weighted)
 
 if __name__ == '__main__':
     try:
