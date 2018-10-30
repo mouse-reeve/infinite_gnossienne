@@ -12,6 +12,7 @@ class NotationDistribution(object):
         self.bass_dist = None
         self.treble_dist = None
         self.identifiers = defaultdict(set)
+
         self.parse_mxl(filename)
 
     def parse_mxl(self, filename):
@@ -35,6 +36,7 @@ class NotationDistribution(object):
         self.bass_dist = {d: defaultdict(lambda: 0) \
                 for d in self.identifiers[staff]}
         bass = self.tokens[staff]
+
         for (idx, note) in enumerate(bass):
             try:
                 next_note = bass[idx + 1]
@@ -42,21 +44,38 @@ class NotationDistribution(object):
             except IndexError:
                 break
 
+        # ----- STEP 3: remove any dead ends
+        dead = []
+        for (idx, entry) in self.bass_dist.items():
+            if not len(entry.keys()):
+                dead.append(idx)
+        for (idx, entry) in self.bass_dist.items():
+            self.bass_dist[idx] = {k: v if not k in dead else 0 \
+                    for (k, v) in entry.items()}
+
+        #for (k, entry) in self.bass_dist.items():
+        #    print('%s: %s' % (k, dict(entry)))
+
+
     def tokenize_measure(self, measure):
         ''' identify and create atomic note group tokens '''
         notes = measure.findall('note')
+        notes = sorted(notes, key=lambda n: n.get('staff'))
 
+        measure_tokens = defaultdict(list)
         while len(notes):
             # remove the first note from the list
             note = notes[0]
             notes = notes[1:]
+            staff = note.find('staff').text
+
+            is_rest = note.find('rest') is not None
 
             group = [note]
 
-            rest = note.find('rest')
-            if len(notes) and rest is None:
+            if len(notes):
                 # gracenotes
-                if note.find('grace') is not None:
+                if note.find('grace') is not None or is_rest:
                     note = notes[0]
                     notes = notes[1:]
                     group.append(note)
@@ -65,11 +84,11 @@ class NotationDistribution(object):
                 next_note = notes[0]
                 while len(next_note.findall('tie')):
                     notes = notes[1:]
-                    group.append(note)
+                    group.append(next_note)
                     try:
                         next_note = notes[0]
                     except IndexError:
-                        break
+                        pass
 
                 # chords
                 x_pos = note.get('default-x')
@@ -80,12 +99,18 @@ class NotationDistribution(object):
                     try:
                         next_note = notes[0]
                     except IndexError:
-                        break
+                        pass
 
-            staff = note.find('staff').text
             token = NoteToken(group)
             self.identifiers[staff].add(token.identifier)
-            self.tokens[staff].append(NoteToken(group))
+            measure_tokens[staff].append(token)
+        # the notes can be out of order in the measure so we need to sort them
+        for (staff, tokens) in measure_tokens.items():
+            tokens = sorted(tokens, key=lambda t: t.x_pos)
+            #for token in tokens:
+            #    print('%f\t%s' % (token.x_pos, token.identifier))
+            self.tokens[staff] += tokens
+
 
 
     # ------- let's get generative, friends --------------#
@@ -93,6 +118,25 @@ class NotationDistribution(object):
         ''' follow the markov probability distribution,
         creating the melody and then the accompanyment
         based on that '''
+        # ---- STEP 1: generate the melody (bass staff)
+        dist = self.bass_dist
+
+        notes = []
+        start = self.tokens['2'][0].identifier
+        for _ in range(10):
+            notes.append(start)
+            options = dist[start]
+            # TODO: weighted random choice
+            try:
+                start = options.keys()[0]
+            except IndexError:
+                # TODO: remove terminal notes
+                print('CRAP!')
+                break
+
+        for note in notes:
+            print(note)
+
         music_xml = []
         return '\n'.join(music_xml)
 
@@ -108,8 +152,9 @@ class NoteToken(object):
         for note in notes:
             # the x position should ignore grace notes
             if note.find('grace') is None:
-                self.x_pos = note.get('default-x')
-                break
+                if note.get('default-x'):
+                    self.x_pos = float(note.get('default-x'))
+                    break
 
 
 def get_identifier(notes):
@@ -142,3 +187,4 @@ if __name__ == '__main__':
         f = 'gnossiennes_1.musicxml'
 
     notation = NotationDistribution(f)
+    notation.generate_measure()
