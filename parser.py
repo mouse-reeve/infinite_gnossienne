@@ -9,30 +9,32 @@ class NotationDistribution(object):
     ''' probabilistic music notation generation data '''
 
     def __init__(self, filename):
-        self.tokens = defaultdict(list)
-        self.identifiers = defaultdict(set)
+        # keep track of the first note in the original piece
         self.starts = [None, None]
-        self.track_dists = [
-            defaultdict(lambda: defaultdict(lambda: 0)),
-            defaultdict(lambda: defaultdict(lambda: 0)),
-        ]
+
+        # markov chain probability tables for each track
+        self.track_dists = []
+        # relationship between simulatanous notes between tracks
         self.joint_dist = defaultdict(lambda: defaultdict(lambda: 0))
 
+        # populates the distributions
         self.parse_midi(filename)
 
 
     def parse_midi(self, filename):
-        ''' this isn't streaming so it'll be slow for large scores '''
+        ''' create probability distributions from a midi file
+         distributions look like
+         {note: {option: probability, option: probability}, note: {..}, ...} '''
 
         mid = MidiFile(filename)
         tracks = mid.tracks
         # probability that one note follows another in a track
         for (idx, track) in enumerate(tracks):
-            dist = self.track_dists[idx]
+            dist = defaultdict(lambda: defaultdict(lambda: 0))
             tokens = tokenize_track(track)
             for i in range(len(tokens) - 1):
-                one = tokens[i]
-                two = tokens[i + 1]
+                one = tokens[i]['identifier']
+                two = tokens[i + 1]['identifier']
                 if self.starts[idx] is None:
                     self.starts[idx] = one
                 dist[one][two] += 1
@@ -45,6 +47,7 @@ class NotationDistribution(object):
             for (idx, entry) in dist.items():
                 dist[idx] = {k: v if not k in dead else 0 \
                         for (k, v) in entry.items()}
+            self.track_dists.append(dist)
 
         # probability of a note in a track given the behavior of the other track
 
@@ -54,43 +57,61 @@ class NotationDistribution(object):
         self.starts.reverse()
         mid = MidiFile()
         for dist in self.track_dists:
+            # create a new track for the generated music
             track = MidiTrack()
             mid.tracks.append(track)
+
+            # select the same first note as the original piece
             start = self.starts.pop()
-            group = start
+            token = start
             count = 0
             while count < time:
-                for note in group.split('|'):
+                for note in token.split('|'):
                     note = Message.from_str(note)
                     count += note.time
                     track.append(note)
-                options = dist[group]
+                options = dist[token]
                 try:
-                    group = weighted_choice(options)
+                    token = weighted_choice(options)
                 except IndexError:
-                    print(group)
-                    group = start
+                    print('no followup found for token: %s' % token)
+                    token = start
         mid.save('new.mid')
 
 
 def tokenize_track(track):
-    ''' find indivisible groups of notes '''
+    ''' find indivisible groups of notes (should at most be a measure)
+    because midi stores a start and an end for each note, we have to
+    close all the notes that open in a group or things get messy '''
+
+    # controls and settings get added back later
     notes = [n for n in track if n.type == 'note_on']
+
     tokens = []
-    while notes:
-        base_note = notes[0].note
-        group = []
-        while notes:
-            note = notes[0]
-            note.velocity = 100 if note.velocity else 0
-            group.append(note.__str__())
-            notes = notes[1:]
-            if not notes:
-                break
-            if notes[0].note == base_note:
-                break
-        group = '|'.join(group)
-        tokens.append(group)
+    group = []
+    open_notes = []
+    for note in notes:
+        note.velocity = 100 if note.velocity else 0
+        group.append(note)
+        if note.velocity > 0:
+            # a new note!
+            open_notes.append(note)
+        else:
+            # a note has finished -- assumes there can't be two of the same
+            # note open at once
+            for (i, o) in enumerate(open_notes):
+                if note.note == o.note:
+                    del open_notes[i]
+                    break
+        if len(open_notes) < 1:
+            # all notes are closed, the group is set
+            identifier = '|'.join(n.__str__() for n in group)
+            token = {
+                'notes': group,
+                'identifier': identifier
+            }
+            tokens.append(token)
+            group = []
     return tokens
 
 
