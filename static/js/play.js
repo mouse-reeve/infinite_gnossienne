@@ -7,10 +7,10 @@ window.onload = function () {
 
     var context = renderer.getContext();
     var staves = [
-        new VF.Stave(40, 40, 400),
-        new VF.Stave(40, 150, 400),
+        new VF.Stave(40, 40, 600, { right_bar: false }),
+        new VF.Stave(40, 150, 600, { right_bar: false }),
         // the secret second bass clef where the whole notes live
-        new VF.Stave(40, 150, 400),
+        new VF.Stave(40, 150, 600, { right_bar: false }),
     ];
 
     var clefs = ['treble', 'bass', 'bass'];
@@ -19,6 +19,7 @@ window.onload = function () {
             staves[i].addClef(clefs[i]);
             staves[i].addKeySignature('Ab');
             staves[i].setContext(context).draw();
+            staves[i].setNoteStartX(115);
         }
     }
     var connector = new VF.StaveConnector(staves[0], staves[1]);
@@ -92,6 +93,7 @@ window.onload = function () {
         playMeasure(starts[1], 1);
     });
 
+    // ------------ let us DRAWWWW ------------- \\
     function drawNotes(notes, staff) {
         //console.log(notes);
         var vf_notes = [];
@@ -177,7 +179,7 @@ window.onload = function () {
             flat_beams: true,
             stem_direction: staff == 1 ? -1 : 1,
         });
-        var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
+        var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 200);
         voice.draw(context, staves[staff]);
         beams.forEach(function(beam) {
             return beam.setContext(context).draw();
@@ -186,7 +188,7 @@ window.onload = function () {
         if (vf_notes_w.length > 0) {
             voice = new VF.Voice({num_beats: 4,  beat_value: 4});
             voice.addTickables(vf_notes_w);
-            formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
+            formatter = new VF.Formatter().joinVoices([voice]).format([voice], 200);
             voice.draw(context, staves[2]);
         }
     }
