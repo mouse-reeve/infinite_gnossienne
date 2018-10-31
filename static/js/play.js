@@ -118,7 +118,10 @@ window.onload = function () {
             voices = voices.concat(get_voice(notes, i));
         }
 
-        var formatter = new VF.Formatter().joinVoices(voices).format(voices, 200);
+        var formatter = new VF.Formatter();
+        formatter.joinVoices([voices[0]]);
+        formatter.joinVoices([voices[1], voices[2]]);
+        formatter.format(voices, 200);
 
         var beam_function = function(beam) {
             return beam.setContext(context).draw();
