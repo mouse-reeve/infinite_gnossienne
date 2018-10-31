@@ -17,6 +17,7 @@ window.onload = function () {
     for (var i = 0; i < staves.length; i++) {
         if (clefs[i]) {
             staves[i].addClef(clefs[i]);
+            staves[i].addKeySignature('Ab');
             staves[i].setContext(context).draw();
         }
     }
@@ -92,10 +93,11 @@ window.onload = function () {
         var first_note = true;
         for (var i = 0; i < notes.length; i++) {
             // ------------ check for rests
+            var rest_note = staff ? 'b/3' : 'e/5';
             if (notes[i] == '70/1/0/1920') {
                 // special case: whole note rest
                 vf_notes.push(
-                    new VF.StaveNote({clef: clefs[staff], keys: ['b/4'], duration: 'wr'})
+                    new VF.StaveNote({clef: clefs[staff], keys: [rest_note], duration: 'wr'})
                 );
                 break;
             }
@@ -104,7 +106,7 @@ window.onload = function () {
                 // we have ourselves a rest
                 var rest = get_duration(note[2] - 50) + 'r';
                 vf_notes.push(
-                    new VF.StaveNote({clef: clefs[staff], keys: ['b/4'], duration: rest })
+                    new VF.StaveNote({clef: clefs[staff], keys: [rest_note], duration: rest })
                 );
                 //console.log(rest);
             }
@@ -189,7 +191,7 @@ function get_duration(duration) {
 }
 
 function midi_to_note(midi) {
-    var octave = Math.round(midi / 12) - 1;
+    var octave = Math.floor(midi / 12) - 1;
     var note = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'][(midi % 12)];
     return note + '/' + octave;
 }
