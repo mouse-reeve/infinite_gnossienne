@@ -1,32 +1,69 @@
 window.onload = function () {
-    var notation = [[], []];
-    var idx = 0;
+    // ------------ let us annotation ------------- \\
+    var VF = Vex.Flow;
+    var div = document.getElementById('notation');
+    var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+    renderer.resize(500, 500);
 
+    var context = renderer.getContext();
+    var staves = [
+        new VF.Stave(10, 40, 400),
+        new VF.Stave(10, 100, 400),
+    ];
+
+    var clefs = ['treble', 'bass'];
+    for (var i = 0; i < staves.length; i++) {
+        staves[i].addClef(clefs[i]);
+        staves[i].setContext(context).draw();
+    }
+
+
+    // ------------ let us SIIIIING ---------------- \\
     var track_options = [
         {gain: 1, sustain: 1},
-        {gain: 0.4, sustain: 1},
+        {gain: 0.3, sustain: 1},
     ];
+
 
     Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano').then(function (piano) {
         var tempo_modifier = 1.1;
 
         var playNote = function(notes, index, track_id) {
             var note = notes[index].split('/');
+            var velocity = note[1];
             var delay = note[2] * tempo_modifier;
-            if (note[1] > 0) {
-                piano.play(note[0], delay, track_options[track_id]);
 
-                midi_to_note(note[0]);
+            var play = [];
+            if (velocity > 0) {
+                play.push(note[0]);
+                // handle chords
+                while (true) {
+                    var proposed = notes[index + 1] ? notes[index + 1].split('/') : undefined;
+                    if (!proposed || proposed[2] > 0 || proposed[1] === 0) {
+                        break;
+                    }
+                    index += 1;
+                    play.push(proposed[0]);
+                }
+
+                for (var i = 0; i < play.length; i++) {
+                    piano.play(play[i], 0, track_options[track_id]);
+                }
             }
+
             if (notes[index + 1]) {
-                window.setTimeout(playNote.bind(null, notes, index+1, track_id), delay);
+                var next = notes[index + 1].split('/');
+                window.setTimeout(playNote.bind(null, notes, index + 1, track_id), next[2] * tempo_modifier);
             }
         };
 
         var playMeasure = function(token, track_id) {
             var time = 0;
             var notes = token.split('|');
-            playNote(notes, 0, track_id);
+
+            var start = notes[0].split('/');
+            window.setTimeout(playNote.bind(null, notes, 0, track_id),
+                start[2] * tempo_modifier);
 
             var options = dists[track_id][token];
             token = weighted_random(options);
@@ -38,13 +75,29 @@ window.onload = function () {
         playMeasure(starts[1], 1);
     });
 
+    function drawNotes(notes, staff) {
+        var vf_notes = [];
+
+        for (var i = 0; i < 4 && i < notes.length; i++) {
+            note = notes[i].split('/');
+            var note_name = midi_to_note(note[0]);
+            vf_notes.push(
+                new VF.StaveNote({clef: clefs[staff], keys: [note_name], duration: "q" })
+            );
+        }
+
+        var voice = new VF.Voice({num_beats: 4,  beat_value: 4});
+        voice.addTickables(vf_notes);
+        var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
+        voice.draw(context, staves[staff]);
+    }
 
 };
 
 function midi_to_note(midi) {
     var octave = Math.round(midi / 12) - 1;
     var note = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][midi % 12];
-    console.log(note, octave);
+    return note + '/' + octave;
 }
 
 function weighted_random(options) {
