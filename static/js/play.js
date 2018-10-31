@@ -152,7 +152,7 @@ window.onload = function () {
             // ------------- grace notes
             // stash the grace note away to add it as a modifier to the next note
             if (duration < 100) {
-                var gn = new Vex.Flow.GraceNote({keys: [note_name], duration: '16', slash: true });
+                var gn = new Vex.Flow.GraceNote({keys: [note_name], duration: '8', slash: true });
                 grace_note = new Vex.Flow.GraceNoteGroup([gn], true);
                 continue;
             }
