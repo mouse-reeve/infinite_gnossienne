@@ -114,6 +114,24 @@ window.onload = function () {
 
     // ------------ let us DRAWWWW ------------- \\
     function drawNotes(notes, staff) {
+        var voice = get_voice(notes, staff);
+        var formatter = new VF.Formatter().joinVoices(voice).format(voice, 200);
+        staves[staff].setNoteStartX(x_pos);
+
+        var beam_function = function(beam) {
+            return beam.setContext(context).draw();
+        };
+        for (var i = 0; i < voice.length; i++) {
+            var beams = VF.Beam.generateBeams(voice[i].getTickables(), {
+                flat_beams: true,
+                stem_direction: staff == 1 ? -1 : 1,
+            });
+            voice[i].draw(context, staves[staff]);
+            beams.forEach(beam_function);
+        }
+    }
+
+    function get_voice(notes, staff) {
         //console.log(notes);
         var vf_notes = [];
         var vf_notes_w = [];
@@ -194,23 +212,15 @@ window.onload = function () {
 
         var voice = new VF.Voice({num_beats: 4,  beat_value: 4});
         voice.addTickables(vf_notes);
-        var beams = VF.Beam.generateBeams(voice.getTickables(), {
-            flat_beams: true,
-            stem_direction: staff == 1 ? -1 : 1,
-        });
-        var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 200);
-        staves[staff].setNoteStartX(x_pos);
-        voice.draw(context, staves[staff]);
-        beams.forEach(function(beam) {
-            return beam.setContext(context).draw();
-        });
+
+        var voices = [voice];
 
         if (vf_notes_w.length > 0) {
             voice = new VF.Voice({num_beats: 4,  beat_value: 4});
             voice.addTickables(vf_notes_w);
-            formatter = new VF.Formatter().joinVoices([voice]).format([voice], 200);
-            voice.draw(context, staves[2]);
+            voices.push(voice);
         }
+        return voices;
     }
 };
 
