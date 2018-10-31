@@ -92,31 +92,19 @@ class NotationDistribution(object):
 
 
 def tokenize_track(track):
-    ''' find indivisible groups of notes (should at most be a measure)
-    because midi stores a start and an end for each note, we have to
-    close all the notes that open in a group or things get messy '''
-
+    ''' group 4/4 measures together (1920 ms) -- sorry satie '''
     # controls and settings get added back later
     notes = [n for n in track if n.type == 'note_on']
 
     tokens = []
     group = []
-    open_notes = []
+    running_time = 0
     for note in notes:
         note.velocity = 100 if note.velocity else 0
         group.append(note)
-        if note.velocity > 0:
-            # a new note!
-            open_notes.append(note)
-        else:
-            # a note has finished -- assumes there can't be two of the same
-            # note open at once
-            for (i, o) in enumerate(open_notes):
-                if note.note == o.note:
-                    del open_notes[i]
-                    break
-        if len(open_notes) < 1:
-            # all notes are closed, the group is set
+        running_time += note.time
+
+        if running_time >= 1920:
             identifier = '|'.join(n.__str__() for n in group)
             token = {
                 'notes': group,
@@ -124,6 +112,8 @@ def tokenize_track(track):
             }
             tokens.append(token)
             group = []
+            running_time = 0
+
     return tokens
 
 
