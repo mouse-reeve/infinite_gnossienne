@@ -7,10 +7,10 @@ window.onload = function () {
 
     var context = renderer.getContext();
     var staves = [
-        new VF.Stave(10, 40, 400),
-        new VF.Stave(10, 150, 400),
+        new VF.Stave(40, 40, 400),
+        new VF.Stave(40, 150, 400),
         // the secret second bass clef where the whole notes live
-        new VF.Stave(10, 150, 400),
+        new VF.Stave(40, 150, 400),
     ];
 
     var clefs = ['treble', 'bass', 'bass'];
@@ -21,7 +21,15 @@ window.onload = function () {
             staves[i].setContext(context).draw();
         }
     }
-
+    var connector = new VF.StaveConnector(staves[0], staves[1]);
+    var line = new VF.StaveConnector(staves[0], staves[1]);
+    connector.setType(VF.StaveConnector.type.BRACE);
+    connector.setContext(context);
+    line.setType(VF.StaveConnector.type.SINGLE);
+    connector.setContext(context);
+    line.setContext(context);
+    connector.draw();
+    line.draw();
 
     // ------------ let us SIIIIING ---------------- \\
     var track_options = [
@@ -142,7 +150,9 @@ window.onload = function () {
             //console.log(names);
 
             // ------------ create and render vexflow notes
-            var vf_note = new VF.StaveNote({clef: clefs[staff], keys: names, duration: type });
+            var params = {clef: clefs[staff], keys: names, duration: type };
+            params.stem_direction = staff == 1 ? -1 : 1;
+            var vf_note = new VF.StaveNote(params);
             // modifiers
             if (grace_note) {
                 vf_note.addModifier(0, grace_note.beamNotes());
@@ -163,8 +173,16 @@ window.onload = function () {
 
         var voice = new VF.Voice({num_beats: 4,  beat_value: 4});
         voice.addTickables(vf_notes);
+        var beams = VF.Beam.generateBeams(voice.getTickables(), {
+            flat_beams: true,
+            stem_direction: staff == 1 ? -1 : 1,
+        });
         var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
         voice.draw(context, staves[staff]);
+        beams.forEach(function(beam) {
+            return beam.setContext(context).draw();
+        });
+
         if (vf_notes_w.length > 0) {
             voice = new VF.Voice({num_beats: 4,  beat_value: 4});
             voice.addTickables(vf_notes_w);
@@ -172,8 +190,6 @@ window.onload = function () {
             voice.draw(context, staves[2]);
         }
     }
-    //drawNotes(["72/100/480/239", "72/0/239/0", "75/100/1/239", "75/0/239/0", "74/100/1/479", "74/0/479/0", "72/100/1/479", "72/0/479/0"]);
-
 };
 
 function get_duration(duration) {
