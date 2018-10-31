@@ -85,7 +85,7 @@ window.onload = function () {
             var options = dists[track_id][token];
             token = weighted_random(options);
 
-            //window.setTimeout(playMeasure.bind(null, token, track_id), 1920 * tempo_modifier);
+            window.setTimeout(playMeasure.bind(null, token, track_id), 1920 * tempo_modifier);
         };
 
         playMeasure(starts[0], 0);
