@@ -105,7 +105,10 @@ def tokenize_track(track):
         running_time += note.time
 
         if running_time >= 1920:
-            identifier = '|'.join(n.__str__() for n in group)
+            identifier = []
+            for n in group:
+                identifier.append('%d/%d/%d' % (n.note, n.velocity, n.time))
+            identifier = '|'.join(identifier)
             token = {
                 'notes': group,
                 'identifier': identifier
