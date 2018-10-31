@@ -100,14 +100,18 @@ def tokenize_track(track):
     group = []
     running_time = 0
     for note in notes:
-        note.velocity = 100 if note.velocity else 0
-        group.append(note)
         running_time += note.time
-
-        if running_time >= 1920:
+        # we're done, process the note group into a token
+        if running_time >= 1920 and note.velocity > 0:
             identifier = []
             for n in group:
-                identifier.append('%d/%d/%d' % (n.note, n.velocity, n.time))
+                duration = n[2] - n[1]
+                if n[0].velocity > 0:
+                    print(n[0].note, n[1], n[2], duration)
+                else:
+                    duration = 0
+                identifier.append('%d/%d/%d/%d' % \
+                        (n[0].note, n[0].velocity, n[0].time, duration))
             identifier = '|'.join(identifier)
             token = {
                 'notes': group,
@@ -116,6 +120,18 @@ def tokenize_track(track):
             tokens.append(token)
             group = []
             running_time = 0
+
+        # and let's get on with the next group
+        note.velocity = 100 if note.velocity else 0
+
+        note = [note, running_time, 0] # note, start time, end time
+        if note[0].velocity == 0:
+            # we have to search backwards in the group to find the start
+            for (idx, n) in enumerate(group[::-1]):
+                if n[0].note == note[0].note:
+                    group[len(group) - 1 - idx][2] = running_time
+                    break
+        group.append(note)
 
     return tokens
 
@@ -138,4 +154,5 @@ if __name__ == '__main__':
         f = 'gnossiennes_1.mid'
 
     notation = NotationDistribution(f)
-    notation.generate_music()
+    import pdb;pdb.set_trace()
+    #notation.generate_music()
