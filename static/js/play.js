@@ -1,3 +1,11 @@
+var start = function () {
+    if (playMeasure) {
+        playMeasure(starts[0], 0);
+        playMeasure(starts[1], 1);
+    }
+};
+var playMeasure;
+
 window.onload = function () {
     // ------------ let us annotation ------------- \\
     var VF = Vex.Flow;
@@ -71,7 +79,7 @@ window.onload = function () {
             }
         };
 
-        var playMeasure = function(token, track_id) {
+        playMeasure = function(token, track_id) {
             var time = 0;
             var notes = token.split('|');
 
@@ -89,8 +97,8 @@ window.onload = function () {
             window.setTimeout(playMeasure.bind(null, token, track_id), 1920 * tempo_modifier);
         };
 
-        playMeasure(starts[0], 0);
-        playMeasure(starts[1], 1);
+        // done loading
+        var start = document.getElementById('start').removeAttribute('disabled');
     });
 
     // ------------ let us DRAWWWW ------------- \\
