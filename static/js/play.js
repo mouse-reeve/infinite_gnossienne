@@ -1,7 +1,6 @@
 var start = function () {
     if (playMeasure) {
-        playMeasure(starts[0], 0);
-        playMeasure(starts[1], 1);
+        playMeasure(starts);
     }
 };
 var playMeasure;
@@ -23,12 +22,10 @@ window.onload = function () {
 
     var clefs = ['treble', 'bass', 'bass'];
     for (var i = 0; i < staves.length; i++) {
-        if (clefs[i]) {
-            staves[i].addClef(clefs[i]);
-            staves[i].addKeySignature('Ab');
-            staves[i].setContext(context).draw();
-            staves[i].setNoteStartX(115);
-        }
+        staves[i].addClef(clefs[i]);
+        staves[i].addKeySignature('Ab');
+        staves[i].setContext(context).draw();
+        staves[i].setNoteStartX(115);
     }
     var connector = new VF.StaveConnector(staves[0], staves[1]);
     var line = new VF.StaveConnector(staves[0], staves[1]);
@@ -79,22 +76,32 @@ window.onload = function () {
             }
         };
 
-        playMeasure = function(token, track_id) {
-            var time = 0;
-            var notes = token.split('|');
+        playMeasure = function(tokens) {
+            var track_notes = [];
+            for (var i = 0; i < tokens.length; i++) {
+                track_notes.push(tokens[i].split('|'));
+            }
 
-            var start = notes[0].split('/');
-            window.setTimeout(playNote.bind(null, notes, 0, track_id),
-                start[2] * tempo_modifier);
+            for (i = 0; i < tokens.length; i++) {
+                var notes = track_notes[i];
+                var start = notes[0].split('/');
+                window.setTimeout(playNote.bind(null, notes, 0, i),
+                    start[2] * tempo_modifier);
+            }
 
             // draw this measure
-            drawNotes(notes, track_id);
+            for (i = 0; i < tokens.length; i++) {
+                drawNotes(track_notes[i], i);
+            }
 
             // pick the next measure
-            var options = dists[track_id][token];
-            token = weighted_random(options);
+            var next_tokens = [];
+            for (i = 0; i < tokens.length; i++) {
+                var options = dists[i][tokens[i]];
+                next_tokens.push(weighted_random(options));
+            }
 
-            window.setTimeout(playMeasure.bind(null, token, track_id), 1920 * tempo_modifier);
+            window.setTimeout(playMeasure.bind(null, next_tokens), 1920 * tempo_modifier);
         };
 
         // done loading
