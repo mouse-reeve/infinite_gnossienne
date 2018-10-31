@@ -5,36 +5,39 @@ var start = function () {
 };
 var playMeasure;
 
+var x_pos = 0;
 window.onload = function () {
     // ------------ let us annotation ------------- \\
+    var length = innerWidth * 0.95;
     var VF = Vex.Flow;
     var div = document.getElementById('notation');
     var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-    renderer.resize(500, 500);
+    renderer.resize(length, 500);
 
     var context = renderer.getContext();
     var staves = [
-        new VF.Stave(40, 40, 600, { right_bar: false }),
-        new VF.Stave(40, 150, 600, { right_bar: false }),
+        new VF.Stave(40, 40, length, { right_bar: false }),
+        new VF.Stave(40, 150, length, { right_bar: false }),
         // the secret second bass clef where the whole notes live
-        new VF.Stave(40, 150, 600, { right_bar: false }),
+        new VF.Stave(40, 150, length, { right_bar: false }),
     ];
 
+    x_pos = 115;
     var clefs = ['treble', 'bass', 'bass'];
     for (var i = 0; i < staves.length; i++) {
         staves[i].addClef(clefs[i]);
         staves[i].addKeySignature('Ab');
         staves[i].setContext(context).draw();
-        staves[i].setNoteStartX(115);
+        staves[i].setNoteStartX(x_pos);
     }
     var connector = new VF.StaveConnector(staves[0], staves[1]);
     var line = new VF.StaveConnector(staves[0], staves[1]);
     connector.setType(VF.StaveConnector.type.BRACE);
     connector.setContext(context);
-    line.setType(VF.StaveConnector.type.SINGLE);
     connector.setContext(context);
-    line.setContext(context);
     connector.draw();
+    line.setType(VF.StaveConnector.type.SINGLE);
+    line.setContext(context);
     line.draw();
 
     // ------------ let us SIIIIING ---------------- \\
@@ -93,6 +96,7 @@ window.onload = function () {
             for (i = 0; i < tokens.length; i++) {
                 drawNotes(track_notes[i], i);
             }
+            x_pos += 200;
 
             // pick the next measure
             var next_tokens = [];
@@ -195,6 +199,7 @@ window.onload = function () {
             stem_direction: staff == 1 ? -1 : 1,
         });
         var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 200);
+        staves[staff].setNoteStartX(x_pos);
         voice.draw(context, staves[staff]);
         beams.forEach(function(beam) {
             return beam.setContext(context).draw();
