@@ -2,6 +2,7 @@
 from mido import MidiFile, MidiTrack, Message
 
 from collections import defaultdict
+import json
 import random
 import sys
 
@@ -51,15 +52,19 @@ class NotationDistribution(object):
 
         # probability of a note in a track given the behavior of the other track
 
-    def generate_music(self, time=(3 * 60 * 1000)):
+    def generate_music(self, time=(0.5 * 60 * 1000)):
         ''' produce new midi data from the distributions
         this should probably be re-written browser-side '''
         self.starts.reverse()
         mid = MidiFile()
+        json_data = []
         for dist in self.track_dists:
             # create a new track for the generated music
             track = MidiTrack()
             mid.tracks.append(track)
+
+            # create a text version
+            json_track = []
 
             # select the same first note as the original piece
             start = self.starts.pop()
@@ -70,13 +75,20 @@ class NotationDistribution(object):
                     note = Message.from_str(note)
                     count += note.time
                     track.append(note)
+                    json_track.append({
+                        'note': note.note,
+                        'velocity': note.velocity,
+                        'time': note.time,
+                    })
                 options = dist[token]
                 try:
                     token = weighted_choice(options)
                 except IndexError:
                     print('no followup found for token: %s' % token)
                     token = start
+            json_data.append(json_track)
         mid.save('new.mid')
+        json.dump(json_data, open('new.json', 'w'))
 
 
 def tokenize_track(track):
