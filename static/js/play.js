@@ -65,6 +65,10 @@ window.onload = function () {
             window.setTimeout(playNote.bind(null, notes, 0, track_id),
                 start[2] * tempo_modifier);
 
+            // draw this measure
+            drawNotes(notes, track_id);
+
+            // pick the next measure
             var options = dists[track_id][token];
             token = weighted_random(options);
 
@@ -72,18 +76,50 @@ window.onload = function () {
         };
 
         playMeasure(starts[0], 0);
-        playMeasure(starts[1], 1);
+        //playMeasure(starts[1], 1);
     });
 
     function drawNotes(notes, staff) {
         var vf_notes = [];
 
-        for (var i = 0; i < 4 && i < notes.length; i++) {
+        var grace_note;
+        for (var i = 0; i < notes.length; i++) {
+            // --- check for rests
+            if (notes[i] == '70/1/0/1920') {
+                // special case: whole note rest
+                vf_notes.push(
+                    new VF.StaveNote({clef: clefs[staff], keys: ['b/4'], duration: 'wr'})
+                );
+                break;
+            }
             note = notes[i].split('/');
+            if (i === 0 && note[2] > 2 && note[3] > 60) {
+                // we have ourselves a rest
+                var rest = get_duration(note[2] - 50) + 'r';
+                vf_notes.push(
+                    new VF.StaveNote({clef: clefs[staff], keys: ['b/4'], duration: rest })
+                );
+            }
+
             var note_name = midi_to_note(note[0]);
-            vf_notes.push(
-                new VF.StaveNote({clef: clefs[staff], keys: [note_name], duration: "q" })
-            );
+            var duration = parseInt(note[3]);
+            // stash the grace note away to add it as a modifier to the next note
+            if (duration < 100) {
+                var gn = new Vex.Flow.GraceNote({keys: [note_name], duration: '16', slash: true });
+                grace_note = new Vex.Flow.GraceNoteGroup([gn], true);
+                continue;
+            }
+            var type = get_duration(duration);
+
+            var vf_note = new VF.StaveNote({clef: clefs[staff], keys: [note_name], duration: type });
+            if (grace_note) {
+                vf_note.addModifier(0, grace_note.beamNotes());
+                grace_note = undefined;
+            }
+            if (type == 'hd') {
+                vf_note.addDotToAll();
+            }
+            vf_notes.push(vf_note);
         }
 
         var voice = new VF.Voice({num_beats: 4,  beat_value: 4});
@@ -93,6 +129,20 @@ window.onload = function () {
     }
 
 };
+
+function get_duration(duration) {
+    var type = 'w';
+    if (duration <= 240) {
+        type = '8';
+    } else if (duration <= 480) {
+        type = 'q';
+    } else if (duration <= 960) {
+        type = 'h';
+    } else if (duration < 1773) {
+        type = 'hd';
+    }
+    return type;
+}
 
 function midi_to_note(midi) {
     var octave = Math.round(midi / 12) - 1;
