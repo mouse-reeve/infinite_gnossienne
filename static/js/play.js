@@ -93,9 +93,7 @@ window.onload = function () {
             }
 
             // draw this measure
-            for (i = 0; i < tokens.length; i++) {
-                drawNotes(track_notes[i], i);
-            }
+            drawNotes(track_notes);
             x_pos += 200;
 
             // pick the next measure
@@ -113,20 +111,25 @@ window.onload = function () {
     });
 
     // ------------ let us DRAWWWW ------------- \\
-    function drawNotes(notes, staff) {
-        var voice = get_voice(notes, staff);
-        var formatter = new VF.Formatter().joinVoices(voice).format(voice, 200);
-        staves[staff].setNoteStartX(x_pos);
+    function drawNotes(note_sets) {
+        var voices = [];
+        for (var i = 0; i < note_sets.length; i++) {
+            var notes = note_sets[i];
+            voices = voices.concat(get_voice(notes, i));
+        }
+
+        var formatter = new VF.Formatter().joinVoices(voices).format(voices, 200);
 
         var beam_function = function(beam) {
             return beam.setContext(context).draw();
         };
-        for (var i = 0; i < voice.length; i++) {
-            var beams = VF.Beam.generateBeams(voice[i].getTickables(), {
+        for (i = 0; i < voices.length; i++) {
+            staves[i].setNoteStartX(x_pos);
+            var beams = VF.Beam.generateBeams(voices[i].getTickables(), {
                 flat_beams: true,
-                stem_direction: staff == 1 ? -1 : 1,
+                stem_direction: i >= 1 ? -1 : 1,
             });
-            voice[i].draw(context, staves[staff]);
+            voices[i].draw(context, staves[i]);
             beams.forEach(beam_function);
         }
     }
