@@ -11,10 +11,43 @@ var clefs = ['treble', 'bass', 'bass'];
 var flats = ['A', 'B', 'D', 'E'];
 var current_dynamic;
 var dynamic_age = 0;
+var annotation_age;
 var tempo_modifier = 1.1;
 
 window.onload = function () {
-    // ------------ let us annotation ------------- \\
+    // ------------ let us annotate ------------- \\
+    var grammar = tracery.createGrammar({
+        'start': ['#intro# #verb# #noun#', 'with #noun#', 'in #noun#',
+            '#intro# Be #adverb# #adjective#', '#verb# #noun#', '#verb# #noun#',
+        ],
+        'intro': ['so as to', 'don\'t', '', '', '', '',],
+        'adverb': ['very', 'lightly', 'healthily', 'rigorously', 'diligently',
+            '', '', '', '', '', '', '', '', '', ''],
+        'verb': [
+            'have', 'ask', 'wonder about', 'consider', 'ponder', 'mediate',
+            'desecrate', 'memditiate on', 'reject', 'bury', 'conceal', 'request',
+            'defer to', 'listen to', 'ignore', 'repudiate', 'light', 'open',
+            'widen', 'experiment with', 'console', 'secrete', 'deliver',
+            'obtain', 'collect', 'spread out', 'expand', 'join',
+            'interrogate', 'answer',
+        ],
+        'noun': [
+            'humility', 'joy', 'despondence', 'loneliness',
+            'sadness', 'conviction', 'clarity', 'walls', 'air', 'water', 'darkness',
+            'benevolence', 'ill intent', 'questions', 'trepidation', 'fear',
+            'tranquility', 'clairvoyance', 'wit', 'a hole', 'the sound',
+            'your head', 'your body', 'your hands', 'yourself', 'superiority',
+            'ingenuity',
+        ],
+        'adjective': ['calm', 'gaunt', 'moderate', 'slow', 'alone', 'placid',
+            'turgid', 'transformed', 'translucent', 'ingenious',
+            'pensive', 'forgetful', 'resourceful', 'illuminated', 'lost',
+            'lonely', 'transparent', 'liquid', 'kind', 'polite', 'pensive',
+            'magisterial', 'bureaucratic', 'timid', 'benevolent', 'proud',
+            'wise', 'lusterous', 'nostaglic', 'indulgent', 'reticent', 'secretive',
+        ],
+    });
+    // ------------ let us engrave ------------- \\
     var length = innerWidth * 0.95;
     var VF = Vex.Flow;
     var div = document.getElementById('notation');
@@ -109,6 +142,7 @@ window.onload = function () {
         playMeasure = function(tokens) {
             // wiggle the tempo around
             tempo_modifier += (0.5 - Math.random()) / 8;
+
             // adjust dynamic
             var new_dynamic;
             if (!current_dynamic || dynamic_age > 5) {
@@ -120,6 +154,14 @@ window.onload = function () {
             } else {
                 dynamic_age += 1;
             }
+
+            // annotations
+            var annotation;
+            if (annotation_age === undefined || annotation_age > 17) {
+                annotation = get_annotation();
+                annotation_age = 0;
+            }
+            annotation_age += 1;
 
             var track_notes = [];
             for (var i = 0; i < tokens.length; i++) {
@@ -134,7 +176,7 @@ window.onload = function () {
             }
 
             // draw this measure
-            drawNotes(track_notes, new_dynamic);
+            drawNotes(track_notes, new_dynamic, annotation);
             x_pos += measure_width;
 
             // pick the next measure
@@ -156,14 +198,14 @@ window.onload = function () {
     });
 
     // ------------ let us DRAAAAW ------------- \\
-    function drawNotes(note_sets, dynamic) {
+    function drawNotes(note_sets, dynamic, annotation) {
         var voices = [];
         for (var i = 0; i < note_sets.length; i++) {
             var notes = note_sets[i];
             voices = voices.concat(get_voice(notes, clefs[i]));
         }
 
-        // I don't know why joining the voices in the loop breakings this but it doooooessss
+        // I don't know why joining the voices in the loop breaks this but it doooooessss
         var formatter = new VF.Formatter();
         formatter.joinVoices([voices[0]]);
         formatter.joinVoices([voices[1], voices[2]]);
@@ -189,6 +231,23 @@ window.onload = function () {
                 .addTickable(dynamic);
             formatter.format([dvoice], measure_width);
             dvoice.draw(context, staves[1]);
+        }
+
+        if (annotation) {
+            text_note = new VF.TextNote({text: annotation, duration: 'w'})
+                .setLine(-2)
+                .setJustification(VF.TextNote.Justification.LEFT)
+                .setStave(staves[0]);
+            text_note.font = {
+                family: 'Times',
+                size: 14,
+                weight: i ? 'italic' : 'regular',
+            };
+
+            var avoice = new VF.Voice({num_beats: 4, beat_value: 4})
+                .addTickable(text_note);
+            formatter.format([avoice], measure_width);
+            avoice.draw(context, staves[0]);
         }
     }
 
@@ -254,6 +313,7 @@ window.onload = function () {
             var params = {clef: clef, keys: names, duration: type };
             params.stem_direction = clef == 'bass' == 1 ? -1 : 1;
             var vf_note = new VF.StaveNote(params);
+
             // modifiers
             if (grace_note) {
                 vf_note.addModifier(0, grace_note.beamNotes());
@@ -288,6 +348,12 @@ window.onload = function () {
             voices.push(voice);
         }
         return voices;
+    }
+
+    function get_annotation() {
+        var text = grammar.flatten('#start#');
+        text = text.charAt(0).toUpperCase() + text.slice(1);
+        return text;
     }
 };
 
