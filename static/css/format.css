@@ -53,7 +53,9 @@ h2 {
 
 footer {
     text-align: center;
-    position: sticky;
+    position: fixed;
+    width: 97.5%;
+    width: -webkit-fill-available;
     bottom: 0;
     background: white;
     padding: 1em;
