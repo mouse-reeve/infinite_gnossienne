@@ -8,6 +8,7 @@ var playMeasure;
 var x_pos = 0;
 var measure_width = 150;
 var clefs = ['treble', 'bass', 'bass'];
+var flats = ['A', 'B', 'D', 'E'];
 window.onload = function () {
     // ------------ let us annotation ------------- \\
     var length = innerWidth * 0.95;
@@ -194,6 +195,9 @@ window.onload = function () {
             if (duration < 100) {
                 var gn = new Vex.Flow.GraceNote({keys: [note_name], duration: '8', slash: true });
                 grace_note = new Vex.Flow.GraceNoteGroup([gn], true);
+                if (flats.indexOf(note_name.split('/')[0]) > -1) {
+                    gn.addAccidental(0, new VF.Accidental("n"));
+                }
                 continue;
             }
 
@@ -221,7 +225,10 @@ window.onload = function () {
             if (type == 'hd') {
                 vf_note.addDotToAll();
             }
-            // TODO: accidentals
+            // this works because this piece only has naturals and never on chords
+            if (names.length == 1 && flats.indexOf(names[0].split('/')[0]) > -1) {
+                vf_note.addAccidental(0, new VF.Accidental("n"));
+            }
             // vf_notes_w handles satie doubling up the bass stave
             if (type == 'w') {
                 vf_notes_w.push(vf_note);
