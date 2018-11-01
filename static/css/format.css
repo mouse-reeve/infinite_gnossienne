@@ -1,10 +1,23 @@
+body {
+    font-family: Garamond, Georgia, serif;
+}
+
+header {
+    margin-top: 3em;
+}
+
 h1, h2 {
-    font-family: sans-serif;
-    letter-spacing: 0.01em;
+    font-family: Oswald, sans-serif;
+    letter-spacing: 0.05em;
     text-align: center;
+    font-size: 2.5em;
+    font-weight: normal;
+}
+h1 {
+    margin-bottom: 0;
 }
 h2 {
-    font-size: 1.5em;
+    margin-top: 0;
 }
 
 #controls {
