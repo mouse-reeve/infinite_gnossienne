@@ -236,7 +236,7 @@ window.onload = function () {
 
         if (annotation) {
             text_note = new VF.TextNote({text: annotation, duration: 'w'})
-                .setLine(-2)
+                .setLine(-1)
                 .setJustification(VF.TextNote.Justification.LEFT)
                 .setStave(staves[0]);
             text_note.font = {
