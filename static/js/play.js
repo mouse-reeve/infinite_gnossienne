@@ -152,7 +152,11 @@ window.onload = function () {
     }
 
     function get_voice(notes, clef) {
-        //console.log(notes);
+        notes = notes.filter(function(n) {
+            if (n[3] > 0) {
+                return n;
+            }
+        });
         var vf_notes = [];
         var vf_notes_w = [];
 
@@ -175,7 +179,6 @@ window.onload = function () {
                 vf_notes.push(
                     new VF.StaveNote({clef: clef, keys: [rest_note], duration: rest })
                 );
-                //console.log(rest);
             }
 
             // ------------- note info
@@ -185,7 +188,6 @@ window.onload = function () {
             if (duration <= 0) {
                 continue;
             }
-            //console.log(type);
 
             // ------------- grace notes
             // stash the grace note away to add it as a modifier to the next note
@@ -220,7 +222,7 @@ window.onload = function () {
                 vf_note.addDotToAll();
             }
             // TODO: accidentals
-            // handle satie doubling up the bass stave
+            // vf_notes_w handles satie doubling up the bass stave
             if (type == 'w') {
                 vf_notes_w.push(vf_note);
             } else {
