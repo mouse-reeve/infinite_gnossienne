@@ -2,6 +2,7 @@ body {
     font-family: Oswald, sans-serif;
     padding: 0;
     margin: 0;
+    margin-bottom: 3em;
 }
 
 #start[disabled="disabled"] {
