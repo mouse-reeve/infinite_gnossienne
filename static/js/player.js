@@ -94,7 +94,7 @@ function createPiano() {
             window.setTimeout(playMeasure.bind(null, next_tokens), 1920 * tempo_modifier);
         };
 
-        // done loading
+        // done loading, enable the play button
         var start = document.getElementById('start').removeAttribute('disabled');
     });
 }
