@@ -18,37 +18,8 @@ var voice_cache = {};
 
 window.onload = function () {
     // ------------ let us annotate ------------- \\
-    var grammar = tracery.createGrammar({
-        'start': ['#intro# #verb# #noun#', 'with #noun#', 'in #noun#',
-            '#intro# be #adverb# #adjective#', '#verb# #noun#', '#verb# #noun#',
-        ],
-        'intro': ['so as to', 'don\'t', '', '', '', '',],
-        'adverb': ['very', 'lightly', 'healthily', 'rigorously', 'diligently',
-            '', '', '', '', '', '', '', '', '', ''],
-        'verb': [
-            'have', 'ask', 'wonder about', 'consider', 'ponder', 'mediate',
-            'desecrate', 'memditiate on', 'reject', 'bury', 'conceal', 'request',
-            'defer to', 'listen to', 'ignore', 'repudiate', 'light', 'open',
-            'widen', 'experiment with', 'console', 'secrete', 'deliver',
-            'obtain', 'collect', 'spread out', 'expand', 'join',
-            'interrogate', 'answer',
-        ],
-        'noun': [
-            'humility', 'joy', 'despondence', 'loneliness',
-            'sadness', 'conviction', 'clarity', 'walls', 'air', 'water', 'darkness',
-            'benevolence', 'ill intent', 'questions', 'trepidation', 'fear',
-            'tranquility', 'clairvoyance', 'wit', 'a hole', 'the sound',
-            'your head', 'your body', 'your hands', 'yourself', 'superiority',
-            'ingenuity',
-        ],
-        'adjective': ['calm', 'gaunt', 'moderate', 'slow', 'alone', 'placid',
-            'turgid', 'transformed', 'translucent', 'ingenious',
-            'pensive', 'forgetful', 'resourceful', 'illuminated', 'lost',
-            'lonely', 'transparent', 'liquid', 'kind', 'polite', 'pensive',
-            'magisterial', 'bureaucratic', 'timid', 'benevolent', 'proud',
-            'wise', 'lusterous', 'nostaglic', 'indulgent', 'reticent', 'secretive',
-        ],
-    });
+    var grammar = tracery.createGrammar(grammar_data);
+
     // ------------ let us engrave ------------- \\
     var length = innerWidth * 0.95;
     var VF = Vex.Flow;
@@ -100,16 +71,13 @@ window.onload = function () {
 
         var playNote = function(notes, index, track_id) {
             // smooth tempo changes
-            if (tempo_modifier > 1.1) {
-                tempo_modifier -= 0.01;
-            } else {
-                tempo_modifier += 0.001;
-            }
+            tempo_modifier += tempo_modifier > 1.1 ? -0.01 : 0.001;
+
             // smooth dynamic changes
             var options = track_options[track_id];
             if (options.gain > options.gain_center) {
                 track_options[track_id].gain -= options.gain / 100;
-            } else if (options.gain < options.gain_center) {
+            } else {
                 track_options[track_id].gain += options.gain / 100;
             }
 
