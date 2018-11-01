@@ -14,12 +14,16 @@ body {
     background: #ddd;
 }
 
+#start-container {
+    position: absolute;
+    top: 17.5rem;
+    width: 100%;
+}
+
 #start {
+    display: block;
     background: red;
     margin: 0 auto;
-    position: absolute;
-    top: 20rem;
-    right: 45%;
     border-radius: 4rem;
     height: 8rem;
     width: 8rem;
