@@ -6,39 +6,48 @@ var start = function () {
 var playMeasure;
 
 var x_pos = 0;
+var measure_width = 150;
+var clefs = ['treble', 'bass', 'bass'];
 window.onload = function () {
     // ------------ let us annotation ------------- \\
     var length = innerWidth * 0.95;
     var VF = Vex.Flow;
     var div = document.getElementById('notation');
-    var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-    renderer.resize(length, 500);
 
-    var context = renderer.getContext();
-    var staves = [
-        new VF.Stave(40, 40, length, { right_bar: false }),
-        new VF.Stave(40, 150, length, { right_bar: false }),
-        // the secret second bass clef where the whole notes live
-        new VF.Stave(40, 150, length, { right_bar: false }),
-    ];
+    var staves;
+    var context;
 
-    x_pos = 115;
-    var clefs = ['treble', 'bass', 'bass'];
-    for (var i = 0; i < staves.length; i++) {
-        staves[i].addClef(clefs[i]);
-        staves[i].addKeySignature('Ab');
-        staves[i].setContext(context).draw();
-        staves[i].setNoteStartX(x_pos);
+    function render_staves() {
+        var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+        renderer.resize(length, 300);
+
+        context = renderer.getContext();
+        staves = [
+            new VF.Stave(40, 30, length, { right_bar: false }),
+            new VF.Stave(40, 140, length, { right_bar: false }),
+            // the secret second bass clef where the whole notes live
+            new VF.Stave(40, 140, length, { right_bar: false }),
+        ];
+
+        x_pos = 115;
+        for (var i = 0; i < staves.length; i++) {
+            staves[i].addClef(clefs[i]);
+            staves[i].addKeySignature('Ab');
+            staves[i].setContext(context).draw();
+            staves[i].setNoteStartX(x_pos);
+        }
+        var connector = new VF.StaveConnector(staves[0], staves[1]);
+        var line = new VF.StaveConnector(staves[0], staves[1]);
+        connector.setType(VF.StaveConnector.type.BRACE);
+        connector.setContext(context);
+        connector.setContext(context);
+        connector.draw();
+        line.setType(VF.StaveConnector.type.SINGLE);
+        line.setContext(context);
+        line.draw();
     }
-    var connector = new VF.StaveConnector(staves[0], staves[1]);
-    var line = new VF.StaveConnector(staves[0], staves[1]);
-    connector.setType(VF.StaveConnector.type.BRACE);
-    connector.setContext(context);
-    connector.setContext(context);
-    connector.draw();
-    line.setType(VF.StaveConnector.type.SINGLE);
-    line.setContext(context);
-    line.draw();
+
+    render_staves();
 
     // ------------ let us SIIIIING ---------------- \\
     var track_options = [
@@ -94,13 +103,17 @@ window.onload = function () {
 
             // draw this measure
             drawNotes(track_notes);
-            x_pos += 200;
+            x_pos += measure_width;
 
             // pick the next measure
             var next_tokens = [];
             for (i = 0; i < tokens.length; i++) {
                 var options = dists[i][tokens[i]];
                 next_tokens.push(weighted_random(options));
+            }
+
+            if (x_pos > length - measure_width) {
+                render_staves();
             }
 
             window.setTimeout(playMeasure.bind(null, next_tokens), 1920 * tempo_modifier);
@@ -110,18 +123,19 @@ window.onload = function () {
         var start = document.getElementById('start').removeAttribute('disabled');
     });
 
-    // ------------ let us DRAWWWW ------------- \\
+    // ------------ let us DRAAAAW ------------- \\
     function drawNotes(note_sets) {
         var voices = [];
         for (var i = 0; i < note_sets.length; i++) {
             var notes = note_sets[i];
-            voices = voices.concat(get_voice(notes, i));
+            voices = voices.concat(get_voice(notes, clefs[i]));
         }
 
+        // I don't know why joining the voices in the loop breakings this but it doooooessss
         var formatter = new VF.Formatter();
         formatter.joinVoices([voices[0]]);
         formatter.joinVoices([voices[1], voices[2]]);
-        formatter.format(voices, 200);
+        formatter.format(voices, measure_width);
 
         var beam_function = function(beam) {
             return beam.setContext(context).draw();
@@ -137,7 +151,7 @@ window.onload = function () {
         }
     }
 
-    function get_voice(notes, staff) {
+    function get_voice(notes, clef) {
         //console.log(notes);
         var vf_notes = [];
         var vf_notes_w = [];
@@ -146,11 +160,11 @@ window.onload = function () {
         var first_note = true;
         for (var i = 0; i < notes.length; i++) {
             // ------------ check for rests
-            var rest_note = staff ? 'b/3' : 'e/5';
+            var rest_note = clef == 'bass' ? 'b/3' : 'e/5';
             if (notes[i] == '70/1/0/1920') {
                 // special case: whole note rest
                 vf_notes.push(
-                    new VF.StaveNote({clef: clefs[staff], keys: [rest_note], duration: 'wr'})
+                    new VF.StaveNote({clef: clef, keys: [rest_note], duration: 'wr'})
                 );
                 break;
             }
@@ -159,7 +173,7 @@ window.onload = function () {
                 // we have ourselves a rest
                 var rest = get_duration(note[2] - 50) + 'r';
                 vf_notes.push(
-                    new VF.StaveNote({clef: clefs[staff], keys: [rest_note], duration: rest })
+                    new VF.StaveNote({clef: clef, keys: [rest_note], duration: rest })
                 );
                 //console.log(rest);
             }
@@ -192,11 +206,10 @@ window.onload = function () {
                 var proposed_name = midi_to_note(proposed[0]);
                 names.push(proposed_name);
             }
-            //console.log(names);
 
             // ------------ create and render vexflow notes
-            var params = {clef: clefs[staff], keys: names, duration: type };
-            params.stem_direction = staff == 1 ? -1 : 1;
+            var params = {clef: clef, keys: names, duration: type };
+            params.stem_direction = clef == 'bass' == 1 ? -1 : 1;
             var vf_note = new VF.StaveNote(params);
             // modifiers
             if (grace_note) {
