@@ -14,12 +14,13 @@ var current_dynamic;
 var dynamic_age = 0;
 var annotation_age;
 var tempo_modifier = 1.1;
+var voice_cache = {};
 
 window.onload = function () {
     // ------------ let us annotate ------------- \\
     var grammar = tracery.createGrammar({
         'start': ['#intro# #verb# #noun#', 'with #noun#', 'in #noun#',
-            '#intro# Be #adverb# #adjective#', '#verb# #noun#', '#verb# #noun#',
+            '#intro# be #adverb# #adjective#', '#verb# #noun#', '#verb# #noun#',
         ],
         'intro': ['so as to', 'don\'t', '', '', '', '',],
         'adverb': ['very', 'lightly', 'healthily', 'rigorously', 'diligently',
@@ -177,7 +178,7 @@ window.onload = function () {
             }
 
             // draw this measure
-            drawNotes(track_notes, new_dynamic, annotation);
+            drawNotes(tokens, new_dynamic, annotation);
             x_pos += measure_width;
 
             // pick the next measure
@@ -199,11 +200,14 @@ window.onload = function () {
     });
 
     // ------------ let us DRAAAAW ------------- \\
-    function drawNotes(note_sets, dynamic, annotation) {
-        var voices = [];
-        for (var i = 0; i < note_sets.length; i++) {
-            var notes = note_sets[i];
-            voices = voices.concat(get_voice(notes, clefs[i]));
+    function drawNotes(tokens, dynamic, annotation) {
+        var voices = voice_cache[tokens.join('||')] || [];
+        if (!voices.length) {
+            for (var t = 0; t < tokens.length; t++) {
+                var notes = tokens[t].split('|');
+                voices = voices.concat(get_voice(notes, clefs[t]));
+            }
+            voice_cache[tokens.join('||')] = voices;
         }
 
         // I don't know why joining the voices in the loop breaks this but it doooooessss
@@ -215,7 +219,7 @@ window.onload = function () {
         var beam_function = function(beam) {
             return beam.setContext(context).draw();
         };
-        for (i = 0; i < voices.length; i++) {
+        for (var i = 0; i < voices.length; i++) {
             staves[i].setNoteStartX(x_pos);
             var beams = VF.Beam.generateBeams(voices[i].getTickables(), {
                 flat_beams: true,
@@ -240,7 +244,7 @@ window.onload = function () {
                 .setJustification(VF.TextNote.Justification.LEFT)
                 .setStave(staves[0]);
             text_note.font = {
-                family: 'Times',
+                family: 'Georgia',
                 size: 14,
             };
 
@@ -351,9 +355,8 @@ window.onload = function () {
     }
 
     function get_annotation() {
-        var text = grammar.flatten('#start#');
-        text = text.charAt(0).toUpperCase() + text.slice(1);
-        return text;
+        var text = grammar.flatten('#start#').trim();
+        return text.charAt(0).toUpperCase() + text.slice(1);
     }
 };
 
