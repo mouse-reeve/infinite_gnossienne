@@ -11,6 +11,7 @@ var clefs = ['treble', 'bass', 'bass'];
 var flats = ['A', 'B', 'D', 'E'];
 var current_dynamic;
 var dynamic_age = 0;
+var tempo_modifier = 1.1;
 
 window.onload = function () {
     // ------------ let us annotation ------------- \\
@@ -55,15 +56,28 @@ window.onload = function () {
 
     // ------------ let us SIIIIING ---------------- \\
     var track_options = [
-        {gain: 1, sustain: 1},
-        {gain: 0.3, sustain: 1},
+        {gain: 1, sustain: 1, gain_center: 1},
+        {gain: 0.3, sustain: 1, gain_center: 0.3},
     ];
 
 
     Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano').then(function (piano) {
-        var tempo_modifier = 1.1;
 
         var playNote = function(notes, index, track_id) {
+            // smooth tempo changes
+            if (tempo_modifier > 1.1) {
+                tempo_modifier -= 0.01;
+            } else {
+                tempo_modifier += 0.001;
+            }
+            // smooth dynamic changes
+            var options = track_options[track_id];
+            if (options.gain > options.gain_center) {
+                track_options[track_id].gain -= options.gain / 100;
+            } else if (options.gain < options.gain_center) {
+                track_options[track_id].gain += options.gain / 100;
+            }
+
             var note = notes[index].split('/');
             var velocity = note[1];
             var delay = note[2] * tempo_modifier;
@@ -82,7 +96,7 @@ window.onload = function () {
                 }
 
                 for (var i = 0; i < play.length; i++) {
-                    piano.play(play[i], 0, track_options[track_id]);
+                    piano.play(play[i], 0, options);
                 }
             }
 
@@ -93,13 +107,15 @@ window.onload = function () {
         };
 
         playMeasure = function(tokens) {
+            // wiggle the tempo around
+            tempo_modifier += (0.5 - Math.random()) / 8;
             // adjust dynamic
             var new_dynamic;
             if (!current_dynamic || dynamic_age > 5) {
                 dynamic_age = 0;
                 current_dynamic = current_dynamic == 'p' ? 'f' : 'p';
                 new_dynamic = current_dynamic;
-                track_options[0].gain = current_dynamic == 'p' ? 0.5 : 2;
+                track_options[0].gain = current_dynamic == 'p' ? 0.5 : 1.5;
                 track_options[1].gain = current_dynamic == 'p' ? 0.2 : 0.4;
             } else {
                 dynamic_age += 1;
