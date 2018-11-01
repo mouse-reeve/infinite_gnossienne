@@ -9,6 +9,9 @@ var x_pos = 0;
 var measure_width = 150;
 var clefs = ['treble', 'bass', 'bass'];
 var flats = ['A', 'B', 'D', 'E'];
+var current_dynamic;
+var dynamic_age = 0;
+
 window.onload = function () {
     // ------------ let us annotation ------------- \\
     var length = innerWidth * 0.95;
@@ -90,6 +93,18 @@ window.onload = function () {
         };
 
         playMeasure = function(tokens) {
+            // adjust dynamic
+            var new_dynamic;
+            if (!current_dynamic || dynamic_age > 5) {
+                dynamic_age = 0;
+                current_dynamic = current_dynamic == 'p' ? 'f' : 'p';
+                new_dynamic = current_dynamic;
+                track_options[0].gain = current_dynamic == 'p' ? 0.5 : 2;
+                track_options[1].gain = current_dynamic == 'p' ? 0.2 : 0.4;
+            } else {
+                dynamic_age += 1;
+            }
+
             var track_notes = [];
             for (var i = 0; i < tokens.length; i++) {
                 track_notes.push(tokens[i].split('|'));
@@ -103,7 +118,7 @@ window.onload = function () {
             }
 
             // draw this measure
-            drawNotes(track_notes);
+            drawNotes(track_notes, new_dynamic);
             x_pos += measure_width;
 
             // pick the next measure
@@ -125,7 +140,7 @@ window.onload = function () {
     });
 
     // ------------ let us DRAAAAW ------------- \\
-    function drawNotes(note_sets) {
+    function drawNotes(note_sets, dynamic) {
         var voices = [];
         for (var i = 0; i < note_sets.length; i++) {
             var notes = note_sets[i];
@@ -149,6 +164,15 @@ window.onload = function () {
             });
             voices[i].draw(context, staves[i]);
             beams.forEach(beam_function);
+
+        }
+
+        if (dynamic) {
+            dynamic = new VF.TextDynamics({text: dynamic, duration: 'w'});
+            var dvoice = new VF.Voice({num_beats: 4, beat_value: 4})
+                .addTickable(dynamic);
+            formatter.format([dvoice], measure_width);
+            dvoice.draw(context, staves[1]);
         }
     }
 
@@ -186,9 +210,6 @@ window.onload = function () {
             var note_name = midi_to_note(note[0]);
             var duration = parseInt(note[3]);
             var type = get_duration(duration);
-            if (duration <= 0) {
-                continue;
-            }
 
             // ------------- grace notes
             // stash the grace note away to add it as a modifier to the next note
@@ -196,7 +217,7 @@ window.onload = function () {
                 var gn = new Vex.Flow.GraceNote({keys: [note_name], duration: '8', slash: true });
                 grace_note = new Vex.Flow.GraceNoteGroup([gn], true);
                 if (flats.indexOf(note_name.split('/')[0]) > -1) {
-                    gn.addAccidental(0, new VF.Accidental("n"));
+                    gn.addAccidental(0, new VF.Accidental('n'));
                 }
                 continue;
             }
@@ -222,12 +243,14 @@ window.onload = function () {
                 vf_note.addModifier(0, grace_note.beamNotes());
                 grace_note = undefined;
             }
+
             if (type == 'hd') {
                 vf_note.addDotToAll();
             }
+
             // this works because this piece only has naturals and never on chords
             if (names.length == 1 && flats.indexOf(names[0].split('/')[0]) > -1) {
-                vf_note.addAccidental(0, new VF.Accidental("n"));
+                vf_note.addAccidental(0, new VF.Accidental('n'));
             }
             // vf_notes_w handles satie doubling up the bass stave
             if (type == 'w') {
