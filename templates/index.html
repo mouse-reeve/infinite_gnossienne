@@ -16,11 +16,20 @@
         <h1>Gnossiennes &#8470;. 1</h1>
         <h2>&infin;</h2>
     </header>
-    <div id="controls">
-        <button id="start" onclick="start()" disabled='disabled'>&#9656;</button>
-        <button id="stop" onclick="stop()" disabled='disabled'>&#9632;</button>
-    </div>
+    <button id="start" onclick="start()" disabled="disabled">&#9656;</button>
     <div id="notation"></div>
 
+    <footer>
+        <div id="controls">
+            <button id="top" onclick="window.scrollTo(0,0);">scroll to top &#9650;</button>
+            <button id="bottom" onclick="window.scrollTo(0,document.body.scrollHeight);">&#9660; scroll to bottom</button>
+        </div>
+        <div id="credits">
+            by
+            <a href="https://en.wikipedia.org/wiki/Erik_Satie">Erik Satie</a>
+            and
+            <a href="https://www.mousereeve.com/">Mouse Reeve</a>
+        </div>
+    </footer>
 </body>
 </html>

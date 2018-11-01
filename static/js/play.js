@@ -1,4 +1,5 @@
 var start = function () {
+    document.getElementById('start').outerHTML = '';
     if (playMeasure) {
         playMeasure(starts);
     }
@@ -241,7 +242,6 @@ window.onload = function () {
             text_note.font = {
                 family: 'Times',
                 size: 14,
-                weight: i ? 'italic' : 'regular',
             };
 
             var avoice = new VF.Voice({num_beats: 4, beat_value: 4})
