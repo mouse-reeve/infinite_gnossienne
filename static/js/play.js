@@ -269,7 +269,7 @@ window.onload = function () {
         for (var i = 0; i < notes.length; i++) {
             // ------------ check for rests
             var rest_note = clef == 'bass' ? 'b/3' : 'e/5';
-            if (notes[i] == '70/1/0/1920') {
+            if (notes[i] == '70/0/0/1920') {
                 // special case: whole note rest
                 vf_notes.push(
                     new VF.StaveNote({clef: clef, keys: [rest_note], duration: 'wr'})

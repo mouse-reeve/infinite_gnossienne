@@ -1,5 +1,6 @@
 *.pyc
 *.swp
 venv/
-app/settings.py
+static/js/lib
+dists.json
 __pycache__/
