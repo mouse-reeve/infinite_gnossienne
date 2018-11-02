@@ -85,7 +85,7 @@ function drawNotes(tokens, dynamic, annotation) {
 
 function get_voice(notes, clef) {
     notes = notes.filter(function(n) {
-        if (n[3] > 0) {
+        if (n.split('/')[3] > 0) {
             return n;
         }
     });
