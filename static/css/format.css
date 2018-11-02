@@ -24,6 +24,7 @@ body {
     display: block;
     background: red;
     margin: 0 auto;
+    padding-bottom: 1em;
     border-radius: 4rem;
     height: 8rem;
     width: 8rem;

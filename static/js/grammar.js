@@ -7,7 +7,7 @@ var grammar_data = {
         '', '', '', '', '', '', '', '', '', ''],
     'verb': [
         'have', 'ask', 'wonder about', 'consider', 'ponder', 'mediate',
-        'desecrate', 'memditiate on', 'reject', 'bury', 'conceal', 'request',
+        'desecrate', 'meditate on', 'reject', 'bury', 'conceal', 'request',
         'defer to', 'listen to', 'ignore', 'repudiate', 'light', 'open',
         'widen', 'experiment with', 'console', 'secrete', 'deliver',
         'obtain', 'collect', 'spread out', 'expand', 'join',
@@ -26,6 +26,6 @@ var grammar_data = {
         'pensive', 'forgetful', 'resourceful', 'illuminated', 'lost',
         'lonely', 'transparent', 'liquid', 'kind', 'polite', 'pensive',
         'magisterial', 'bureaucratic', 'timid', 'benevolent', 'proud',
-        'wise', 'lusterous', 'nostaglic', 'indulgent', 'reticent', 'secretive',
+        'wise', 'lustrous', 'nostalgic', 'indulgent', 'reticent', 'secretive',
     ],
 };
