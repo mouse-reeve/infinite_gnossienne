@@ -195,7 +195,7 @@ function get_duration(duration) {
         type = 'q';
     } else if (duration <= 960) {
         type = 'h';
-    } else if (duration < 1773) {
+    } else if (duration <= 1773) {
         type = 'hd';
     }
     return type;
