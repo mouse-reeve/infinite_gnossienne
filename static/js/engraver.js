@@ -29,13 +29,15 @@ function render_staves() {
 }
 
 function drawNotes(tokens, dynamic, annotation) {
-    var voices = voice_cache[tokens.join('||')] || [];
-    if (!voices.length) {
-        for (var t = 0; t < tokens.length; t++) {
+    var voices = [];
+    for (var t = 0; t < tokens.length; t++) {
+        var voice = voice_cache[tokens[t]];
+        if (!voice) {
             var notes = tokens[t].split('|');
-            voices = voices.concat(get_voice(notes, clefs[t]));
+            voice = get_voice(notes, clefs[t]);
+            voice_cache[tokens[t]] = voice;
         }
-        voice_cache[tokens.join('||')] = voices;
+        voices = voices.concat(voice);
     }
 
     // I don't know why joining the voices in the loop breaks this but it doooooessss
@@ -195,7 +197,7 @@ function get_duration(duration) {
         type = 'q';
     } else if (duration <= 960) {
         type = 'h';
-    } else if (duration <= 1773) {
+    } else if (duration <= 1774) {
         type = 'hd';
     }
     return type;
