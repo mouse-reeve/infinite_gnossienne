@@ -1,6 +1,5 @@
 *.pyc
 *.swp
 venv/
-static/js/lib
 dists.json
 __pycache__/
