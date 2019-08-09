@@ -7,9 +7,9 @@ function createPiano() {
             // smooth dynamic changes
             var options = track_options[track_id];
             if (options.gain > options.gain_center) {
-                track_options[track_id].gain -= options.gain / 100;
+                track_options[track_id].gain -= options.gain / 400;
             } else {
-                track_options[track_id].gain += options.gain / 100;
+                track_options[track_id].gain += options.gain / 400;
             }
 
             var note = notes[index].split('/');
@@ -50,8 +50,8 @@ function createPiano() {
                 dynamic_age = 0;
                 current_dynamic = current_dynamic == 'p' ? 'f' : 'p';
                 new_dynamic = current_dynamic;
-                track_options[0].gain = current_dynamic == 'p' ? 0.5 : 1.5;
-                track_options[1].gain = current_dynamic == 'p' ? 0.2 : 0.4;
+                track_options[0].gain = current_dynamic == 'p' ? 0.5 : 2.0;
+                track_options[1].gain = current_dynamic == 'p' ? 0.2 : 1.0;
             } else {
                 dynamic_age += 1;
             }
