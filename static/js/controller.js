@@ -27,8 +27,6 @@ var clefs = ['treble', 'bass', 'bass'];
 var flats = ['A', 'B', 'D', 'E'];
 // stores vexflow voices containing the data on how to draw a measure
 var voice_cache = {};
-// tracery grammar for creating annotations
-var grammar;
 // measrues since we last added an annotation
 var annotation_age;
 
@@ -44,9 +42,6 @@ var track_options = [
 ];
 
 window.onload = function () {
-    // ---------------- let us annotate ---------------- \\
-    grammar = tracery.createGrammar(grammar_data);
-
     // ---------------- let us engrave ----------------- \\
     VF = Vex.Flow;
     length = innerWidth * 0.95;

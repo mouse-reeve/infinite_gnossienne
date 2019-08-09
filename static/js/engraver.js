@@ -184,11 +184,6 @@ function get_voice(notes, clef) {
     return voices;
 }
 
-function get_annotation() {
-    var text = grammar.flatten('#start#').trim();
-    return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 function get_duration(duration) {
     var type = 'w';
     if (duration <= 240) {

@@ -1,10 +1,6 @@
 var grammar_data = {
-    'start': ['#intro# #verb# #noun#', 'with #noun#', 'in #noun#',
-        '#intro# be #adverb# #adjective#', '#verb# #noun#', '#verb# #noun#',
-    ],
-    'intro': ['so as to', 'don\'t', '', '', '', '',],
-    'adverb': ['very', 'lightly', 'healthily', 'rigorously', 'diligently',
-        '', '', '', '', '', '', '', '', '', ''],
+    'intro': ['so as to', 'don\'t'],
+    'adverb': ['very', 'lightly', 'healthily', 'rigorously', 'diligently'],
     'verb': [
         'have', 'ask', 'wonder about', 'consider', 'ponder', 'mediate',
         'desecrate', 'meditate on', 'reject', 'bury', 'conceal', 'request',
@@ -29,3 +25,40 @@ var grammar_data = {
         'wise', 'lustrous', 'nostalgic', 'indulgent', 'reticent', 'secretive',
     ],
 };
+
+function choose_word(list, skip) {
+    if (Math.random() < skip) {
+        return;
+    }
+    return list[Math.floor(Math.random() * list.length)];
+}
+
+function get_annotation() {
+    var text = [];
+    var dice_roll = Math.random();
+    if (dice_roll < 0.4) {
+        // so as to  reject  your hands
+        text = [
+            choose_word(grammar_data.intro, 0.8),
+            choose_word(grammar_data.verb),
+            choose_word(grammar_data.noun),
+        ];
+    } else if (dice_roll < 0.8) {
+        // with  humility
+        text = [
+            choose_word(['with', 'in']),
+            choose_word(grammar_data.noun),
+        ];
+    } else {
+        // don't  be  very  timid
+        text = [
+            choose_word(grammar_data.intro, 0.6),
+            'be',
+            choose_word(grammar_data.adverb, 0.5),
+            choose_word(grammar_data.adjective),
+        ];
+    }
+
+    text = text.join(' ').trim();
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
