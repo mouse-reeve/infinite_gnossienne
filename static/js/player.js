@@ -2,7 +2,7 @@ function createPiano() {
     Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano').then(function (piano) {
         var playNote = function(notes, index, track_id) {
             // smooth tempo changes
-            tempo_modifier += tempo_modifier > 1.1 ? -0.01 : 0.001;
+            tempo += tempo_variance * (tempo > base_tempo ? -0.01 : 0.001);
 
             // smooth dynamic changes
             var options = track_options[track_id];
@@ -14,7 +14,7 @@ function createPiano() {
 
             var note = notes[index].split('/');
             var velocity = note[1];
-            var delay = note[2] * tempo_modifier;
+            var delay = note[2] * tempo;
 
             var play = [];
             if (velocity > 0) {
@@ -36,13 +36,13 @@ function createPiano() {
 
             if (notes[index + 1]) {
                 var next = notes[index + 1].split('/');
-                window.setTimeout(playNote.bind(null, notes, index + 1, track_id), next[2] * tempo_modifier);
+                window.setTimeout(playNote.bind(null, notes, index + 1, track_id), next[2] * tempo);
             }
         };
 
         playMeasure = function(tokens) {
             // wiggle the tempo around
-            tempo_modifier += (0.5 - Math.random()) / 8;
+            tempo += tempo_variance * (0.5 - Math.random()) / 8;
 
             // adjust dynamic
             var new_dynamic;
@@ -73,7 +73,7 @@ function createPiano() {
                 var notes = track_notes[i];
                 var start = notes[0].split('/');
                 window.setTimeout(playNote.bind(null, notes, 0, i),
-                    start[2] * tempo_modifier);
+                    start[2] * tempo);
             }
 
             // draw this measure
@@ -92,7 +92,7 @@ function createPiano() {
                 render_staves();
             }
 
-            window.setTimeout(playMeasure.bind(null, next_tokens), 1920 * tempo_modifier);
+            window.setTimeout(playMeasure.bind(null, next_tokens), measure_length * tempo);
         };
 
         // done loading, enable the play button

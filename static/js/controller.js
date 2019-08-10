@@ -35,7 +35,10 @@ var annotation_age;
 var current_dynamic;
 // how many measures the current dynamic has been active for
 var dynamic_age = 0;
-var tempo_modifier = 1.1;
+var base_tempo = 1.1;
+var tempo = base_tempo;
+var tempo_variance = 1;
+var measure_length = 1920;
 var track_options = [
     {gain: 1, sustain: 1, gain_center: 1},
     {gain: 0.3, sustain: 1, gain_center: 0.3},
