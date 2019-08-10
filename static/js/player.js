@@ -36,11 +36,14 @@ function createPiano() {
 
             if (notes[index + 1]) {
                 var next = notes[index + 1].split('/');
-                window.setTimeout(playNote.bind(null, notes, index + 1, track_id), next[2] * tempo);
+                timeouts.push(window.setTimeout(playNote.bind(null, notes, index + 1, track_id), next[2] * tempo));
             }
         };
 
-        playMeasure = function(tokens) {
+        playMeasure = function(tokens, restart) {
+            restart_point = tokens;
+            timeouts.forEach(clearTimeout);
+            timeouts = [];
             // wiggle the tempo around
             tempo += tempo_variance * (0.5 - Math.random()) / 8;
 
@@ -72,13 +75,15 @@ function createPiano() {
             for (i = 0; i < tokens.length; i++) {
                 var notes = track_notes[i];
                 var start = notes[0].split('/');
-                window.setTimeout(playNote.bind(null, notes, 0, i),
-                    start[2] * tempo);
+                timeouts.push(window.setTimeout(playNote.bind(null, notes, 0, i),
+                    start[2] * tempo));
             }
 
             // draw this measure
-            drawNotes(tokens, new_dynamic, annotation);
-            x_pos += measure_width;
+            if (!restart) {
+                drawNotes(tokens, new_dynamic, annotation);
+                x_pos += measure_width;
+            }
 
             // pick the next measure
             var next_tokens = [];
@@ -92,7 +97,7 @@ function createPiano() {
                 render_staves();
             }
 
-            window.setTimeout(playMeasure.bind(null, next_tokens), measure_length * tempo);
+            timeouts.push(window.setTimeout(playMeasure.bind(null, next_tokens), measure_length * tempo));
         };
 
         // done loading, enable the play button

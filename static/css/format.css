@@ -24,15 +24,20 @@ body {
     display: block;
     background: red;
     margin: 0 auto;
-    padding-bottom: 1em;
-    border-radius: 4rem;
     height: 8rem;
     width: 8rem;
+    padding: 0.7rem 1.75rem;
     color: white;
+    font-size: 6em;
+}
+
+button {
     border: none;
     cursor: pointer;
-    font-size: 6em;
-    font-family: sans-serif;
+}
+
+button.round {
+    border-radius: 50%;
 }
 
 #start:hover {
@@ -69,14 +74,25 @@ footer {
     box-shadow: 0px 3px 10px 3px #eee;
 }
 
-#controls button {
+button.scroll-controls {
     width: 8rem;
     height: 2rem;
     background: #ddd;
     float: left;
-    border: none;
 }
 
-#controls button:last-child {
+button.scroll-controls:last-child {
     float: right;
+}
+
+button.play-controls {
+    background: #ddd;
+    width: 2rem;
+    height: 2rem;
+}
+
+#play {
+    display: none;
+    background-color: red;
+    color: white;
 }

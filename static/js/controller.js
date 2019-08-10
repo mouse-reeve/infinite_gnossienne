@@ -6,8 +6,22 @@ var start = function () {
     if (playMeasure) {
         // remove the button
         document.getElementById('start').outerHTML = '';
-        playMeasure(starts);
+        document.getElementById('pause').disabled = false;
+        play();
     }
+};
+
+var play = function(restart) {
+    if (restart) {
+        document.getElementById('pause').style.display = 'inline';
+        document.getElementById('play').style.display = 'none';
+    }
+    playMeasure(restart_point, restart);
+};
+var pause = function () {
+    document.getElementById('pause').style.display = 'none';
+    document.getElementById('play').style.display = 'inline';
+    timeouts.forEach(clearTimeout);
 };
 
 // function to begin both playing and drawing notes in a measure
@@ -37,12 +51,19 @@ var current_dynamic;
 var dynamic_age = 0;
 var base_tempo = 1.1;
 var tempo = base_tempo;
+// 0 = no variance, always play at base tempo. 1 = I think this amount
+// of variance sounds nicer
 var tempo_variance = 1;
+// TODO: this should be computed rather than hard-coded
 var measure_length = 1920;
 var track_options = [
     {gain: 1, sustain: 1, gain_center: 1},
     {gain: 0.3, sustain: 1, gain_center: 0.3},
 ];
+// this stores all the window.setTimeout events that exist
+var timeouts = [];
+// the current set of notes, so that you can restart after pause
+var restart_point = starts;
 
 window.onload = function () {
     // ---------------- let us engrave ----------------- \\
@@ -70,3 +91,4 @@ function weighted_random(options) {
 
     return listed[Math.floor(Math.random() * listed.length)];
 }
+
