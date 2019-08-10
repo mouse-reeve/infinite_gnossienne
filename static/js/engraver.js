@@ -1,4 +1,5 @@
 function render_staves() {
+    var at_page_bottom = (window.innerHeight + window.scrollY) >= document.body.offsetHeight;
     var renderer = new VF.Renderer(notation_div, VF.Renderer.Backends.SVG);
     renderer.resize(length, 300);
 
@@ -26,6 +27,11 @@ function render_staves() {
     line.setType(VF.StaveConnector.type.SINGLE);
     line.setContext(context);
     line.draw();
+
+    // auto-scroll to new page bottom, if we were already at the bottom
+    if (at_page_bottom) {
+        window.scrollTo(0,document.body.scrollHeight);
+    }
 }
 
 function drawNotes(tokens, dynamic, annotation) {

@@ -50,8 +50,8 @@ function createPiano() {
                 dynamic_age = 0;
                 current_dynamic = current_dynamic == 'p' ? 'f' : 'p';
                 new_dynamic = current_dynamic;
-                track_options[0].gain = current_dynamic == 'p' ? 0.5 : 2.0;
-                track_options[1].gain = current_dynamic == 'p' ? 0.2 : 1.0;
+                track_options[0].gain = current_dynamic == 'p' ? 0.5 : 1.9;
+                track_options[1].gain = current_dynamic == 'p' ? 0.2 : 0.8;
             } else {
                 dynamic_age += 1;
             }
@@ -87,6 +87,7 @@ function createPiano() {
                 next_tokens.push(weighted_random(options));
             }
 
+            // if we're out of room to draw more notes, add a new line
             if (x_pos > length - measure_width) {
                 render_staves();
             }
