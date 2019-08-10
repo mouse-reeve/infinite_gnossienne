@@ -41,6 +41,11 @@ function createPiano() {
         };
 
         playMeasure = function(tokens, restart) {
+            // if we're out of room to draw more notes, add a new line
+            if (x_pos > length - measure_width) {
+                render_staves();
+            }
+
             restart_point = tokens;
             timeouts.forEach(clearTimeout);
             timeouts = [];
@@ -90,11 +95,6 @@ function createPiano() {
             for (i = 0; i < tokens.length; i++) {
                 var options = dists[i][tokens[i]];
                 next_tokens.push(weighted_random(options));
-            }
-
-            // if we're out of room to draw more notes, add a new line
-            if (x_pos > length - measure_width) {
-                render_staves();
             }
 
             timeouts.push(window.setTimeout(playMeasure.bind(null, next_tokens), measure_length * tempo));
