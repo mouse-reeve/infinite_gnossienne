@@ -74,6 +74,10 @@ footer {
     box-shadow: 0px 3px 10px 3px #eee;
 }
 
+#controls {
+    height: 0;
+}
+
 button.scroll-controls {
     width: 8rem;
     height: 2rem;
@@ -85,16 +89,26 @@ button.scroll-controls:last-child {
     float: right;
 }
 
-button.play-controls {
+
+.play-controls {
+    display: inline;
+}
+
+.play-controls button {
     background: #ddd;
     width: 2rem;
     height: 2rem;
     position: relative;
     top: -2rem;
-    visibility: hidden;
+    display: none;
 }
 
 #play {
     background-color: red;
     color: white;
 }
+
+#credits {
+    margin-top: 0.5em;
+}
+
