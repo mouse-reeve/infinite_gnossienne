@@ -89,10 +89,12 @@ button.play-controls {
     background: #ddd;
     width: 2rem;
     height: 2rem;
+    position: relative;
+    top: -2rem;
+    visibility: hidden;
 }
 
 #play {
-    display: none;
     background-color: red;
     color: white;
 }
