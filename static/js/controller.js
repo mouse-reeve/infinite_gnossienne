@@ -6,7 +6,7 @@ var start = function () {
     if (playMeasure) {
         // remove the button
         document.getElementById('start').outerHTML = '';
-        document.getElementById('pause').disabled = false;
+        document.getElementById('pause').style.display = 'inline';
         play();
     }
 };
