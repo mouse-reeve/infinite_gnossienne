@@ -7,9 +7,9 @@ function createPiano() {
             // smooth dynamic changes
             var options = track_options[track_id];
             if (options.gain > options.gain_center) {
-                track_options[track_id].gain -= options.gain / 400;
+                track_options[track_id].gain -= options.gain / 200;
             } else {
-                track_options[track_id].gain += options.gain / 400;
+                track_options[track_id].gain += options.gain / 200;
             }
 
             var note = notes[index].split('/');

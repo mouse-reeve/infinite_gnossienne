@@ -49,12 +49,12 @@ var annotation_age;
 var current_dynamic;
 // how many measures the current dynamic has been active for
 var dynamic_age = 0;
-var base_tempo = 1.1;
+var base_tempo = 1.4;
 var tempo = base_tempo;
 // 0 = no variance, always play at base tempo. 1 = I think this amount
 // of variance sounds nicer
 var tempo_variance = 1;
-// TODO: this should be computed rather than hard-coded
+// TODO: measure length should be computed rather than hard-coded
 var measure_length = 1920;
 var track_options = [
     {gain: 1, sustain: 1, gain_center: 1},
