@@ -97,8 +97,8 @@ function createPiano() {
             dynamic_age = 0;
             current_dynamic = current_dynamic == 'p' ? 'f' : 'p';
             new_dynamic = current_dynamic;
-            track_options[0].gain = current_dynamic == 'p' ? 0.4 : 1;
-            track_options[1].gain = current_dynamic == 'p' ? 0.15 : 0.5;
+            track_options[0].gain = current_dynamic == 'p' ? 0.5 : 1;
+            track_options[1].gain = current_dynamic == 'p' ? 0.15 : 0.4;
         } else {
             dynamic_age += 1;
         }

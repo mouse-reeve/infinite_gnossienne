@@ -64,7 +64,7 @@ var tempo_direction = -1;
 var measure_length = 1920;
 var track_options = [
     {gain: 0.8, gain_center: 0.8},
-    {gain: 0.2, gain_center: 0.2},
+    {gain: 0.2, gain_center: 0.1},
 ];
 // this stores all the window.setTimeout events that exist
 var timeouts = [];
