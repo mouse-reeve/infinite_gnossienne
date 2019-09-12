@@ -20,7 +20,7 @@ function createPiano() {
         audio.volume = track_options[track].gain;
         audio.play();
         audio.className = audio.className.replace('off', 'on');
-        window.setTimeout(stop.bind(null, audio), note[3] * tempo * 1.1);
+        window.setTimeout(stop.bind(null, audio), note[3] * tempo * 1.2);
     };
 
     var stop = function(audio) {
