@@ -63,8 +63,8 @@ var tempo_variance = 1;
 // TODO: measure length should be computed rather than hard-coded
 var measure_length = 1920;
 var track_options = [
-    {gain: 0.8, sustain: 1, gain_center: 0.8},
-    {gain: 0.3, sustain: 1, gain_center: 0.2},
+    {gain: 0.8, gain_center: 0.8},
+    {gain: 0.2, gain_center: 0.2},
 ];
 // this stores all the window.setTimeout events that exist
 var timeouts = [];

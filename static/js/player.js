@@ -1,18 +1,21 @@
 function createPiano() {
-    // initialize audo elements
+    // initialize audio elements -- there's two of them in case the same note overlaps with itself for a sec
+    var midi_number = 21;
     for (var i in acoustic_grand_piano) {
-        for (var j = 0; j < 2; j++) {
+        for (var j = 0; j < 3; j++) {
             var note_element = document.createElement('audio');
-            note_element.className = i + ' off';
+            note_element.className = midi_number + ' off';
             note_element.id = i + j;
             note_element.src = acoustic_grand_piano[i];
             document.body.append(note_element);
         }
+        midi_number += 1;
     }
+
     var play = function (note, track) {
         // TODO: no need to do this every time
         // Notes can overlap slightly, so there are two of each
-        var note_elements = document.getElementsByClassName(midi_to_note(note[0]).replace('/', '') + ' off')
+        var note_elements = document.getElementsByClassName(note[0] + ' off')
         audio = note_elements[0]
         audio.volume = track_options[track].gain;
         audio.play();
@@ -94,7 +97,7 @@ function createPiano() {
             current_dynamic = current_dynamic == 'p' ? 'f' : 'p';
             new_dynamic = current_dynamic;
             track_options[0].gain = current_dynamic == 'p' ? 0.4 : 1;
-            track_options[1].gain = current_dynamic == 'p' ? 0.2 : 0.7;
+            track_options[1].gain = current_dynamic == 'p' ? 0.15 : 0.5;
         } else {
             dynamic_age += 1;
         }
