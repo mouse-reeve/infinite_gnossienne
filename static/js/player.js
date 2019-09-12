@@ -40,7 +40,10 @@ function createPiano() {
 
     var playNote = function(notes, index, track_id) {
         // smooth tempo changes
-        tempo += tempo_variance * (tempo > base_tempo ? -0.01 : 0.001);
+        if (tempo < tempo_range[0] || tempo > tempo_range[1]) {
+            tempo_direction *= -1;
+        }
+        tempo += tempo_direction * tempo_variance * Math.random();
 
         // smooth dynamic changes
         var options = track_options[track_id];
@@ -87,8 +90,6 @@ function createPiano() {
         restart_point = tokens;
         //timeouts.forEach(clearTimeout);
         timeouts = [];
-        // wiggle the tempo around
-        tempo += tempo_variance * (0.5 - Math.random()) / 8;
 
         // adjust dynamic
         var new_dynamic;
