@@ -22,6 +22,12 @@ var pause = function () {
     document.getElementById('pause').style.display = 'none';
     document.getElementById('play').style.display = 'inline';
     timeouts.forEach(clearTimeout);
+    var ons = document.getElementsByClassName('on');
+    for (var i = 0; i < ons.length; i++) {
+        ons[i].pause();
+        ons[i].currentTime = 0;
+        ons[i].className = ons[i].className.replace('on', 'off');
+    }
 };
 
 // function to begin both playing and drawing notes in a measure
@@ -49,7 +55,7 @@ var annotation_age;
 var current_dynamic;
 // how many measures the current dynamic has been active for
 var dynamic_age = 0;
-var base_tempo = 1.4;
+var base_tempo = 1.2;
 var tempo = base_tempo;
 // 0 = no variance, always play at base tempo. 1 = I think this amount
 // of variance sounds nicer
@@ -57,8 +63,8 @@ var tempo_variance = 1;
 // TODO: measure length should be computed rather than hard-coded
 var measure_length = 1920;
 var track_options = [
-    {gain: 1, sustain: 1, gain_center: 1},
-    {gain: 0.3, sustain: 1, gain_center: 0.3},
+    {gain: 0.8, sustain: 1, gain_center: 0.8},
+    {gain: 0.3, sustain: 1, gain_center: 0.2},
 ];
 // this stores all the window.setTimeout events that exist
 var timeouts = [];
