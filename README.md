@@ -4,7 +4,7 @@ An endless version of Erik Satie's Gnossiennes No. 1.
 
 I parsed a midi file of the piece into artificial 4/4 measures (the piece is in free time, I know, sorry Satie)
 and made a markov chain associating the measures across the bass and treble tracks. The result plays back as an endless
-version of the comopsition.
+version of the composition.
 
 Libraries in use:
 - [Soundfont-Player](https://github.com/danigb/soundfont-player) for playing the audio
